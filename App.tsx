@@ -1,17 +1,16 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ApolloProvider } from '@apollo/client/react';
+import { ApolloProvider } from '@apollo/client';
 import CharactersScreen from './src/screens/home.tsx';
 import CharacterDetails from './src/screens/CharacterDetails';
-import { client } from './src/apollo/client'; // ← добавили Apollo Client
+import { client } from './src/apollo/client';
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
     <ApolloProvider client={client}>
-      {' '}
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen
@@ -31,3 +30,4 @@ const App = () => {
 };
 
 export default App;
+
