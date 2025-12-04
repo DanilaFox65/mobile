@@ -1,42 +1,44 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
-import { getCharacters } from '../api/rickAndMortyApi';
+import React from 'react';
+import {
+  View,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+  Text,
+} from 'react-native';
 import CharacterCard from '../components/CharacterCard';
-import { Character } from '../types/Character';
+import { useCharactersQuery } from '../hooks/useCharactersQuery';
 
 const CharactersScreen = ({ navigation }: any) => {
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { characters, loading, refetch, error } = useCharactersQuery();
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getCharacters();
-      setCharacters(data);
-    } catch (error) {
-      console.error('Ошибка загрузки персонажей', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  if (loading) {
+    return <ActivityIndicator style={{ flex: 1 }} size="large" />;
+  }
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  if (error) {
+    return <Text style={styles.errorText}>Ошибка загрузки персонажей</Text>;
+  }
+
+  if (!characters.length) {
+    return <Text style={styles.errorText}>Персонажи не найдены</Text>;
+  }
 
   return (
     <View style={styles.container}>
       <FlatList
         data={characters}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item.id!.toString()}
         renderItem={({ item }) => (
           <CharacterCard
             character={item}
-            onPress={id => navigation.navigate('Character', { id })}
+            onPress={id =>
+              navigation.navigate('Character', { id: id.toString() })
+            }
           />
         )}
         refreshing={loading}
-        onRefresh={load}
+        onRefresh={refetch}
       />
     </View>
   );
@@ -47,6 +49,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#0000CD',
+  },
+  errorText: {
+    flex: 1,
+    textAlign: 'center',
+    marginTop: 20,
+    color: 'white',
+    fontSize: 18,
   },
 });
 

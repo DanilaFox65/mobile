@@ -1,33 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, Image, ActivityIndicator, StyleSheet } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { getCharacterById } from '../api/rickAndMortyApi';
-import { Character } from '../types/Character';
+import { useCharacterQuery } from '../hooks/useCharacterQuery';
 
-type CharacterRouteProp = RouteProp<{ Character: { id: number } }, 'Character'>;
+type CharacterRouteProp = RouteProp<{ Character: { id: string } }, 'Character'>;
 
 const CharacterDetails: React.FC = () => {
   const route = useRoute<CharacterRouteProp>();
   const { id } = route.params;
-  const [character, setCharacter] = useState<Character | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadCharacter = async () => {
-      try {
-        const data = await getCharacterById(id);
-        setCharacter(data);
-      } catch (error) {
-        console.error('Ошибка при загрузке персонажа:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadCharacter();
-  }, [id]);
+  const { character, loading, error } = useCharacterQuery(id);
 
   if (loading) return <ActivityIndicator style={{ flex: 1 }} size="large" />;
-
+  if (error) return <Text>Ошибка при загрузке персонажа</Text>;
   if (!character) return <Text>Персонаж не найден</Text>;
 
   return (
