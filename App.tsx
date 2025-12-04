@@ -1,28 +1,32 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
+import { ApolloProvider } from '@apollo/client/react';
 import CharactersScreen from './src/screens/home.tsx';
 import CharacterDetails from './src/screens/CharacterDetails';
+import { client } from './src/apollo/client'; // ← добавили Apollo Client
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Home"
-          component={CharactersScreen}
-          options={{ title: 'Персонажи' }}
-        />
-        <Stack.Screen
-          name="Character"
-          component={CharacterDetails}
-          options={{ title: 'Информация о персонаже' }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <ApolloProvider client={client}>
+      {' '}
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen
+            name="Home"
+            component={CharactersScreen}
+            options={{ title: 'Персонажи' }}
+          />
+          <Stack.Screen
+            name="Character"
+            component={CharacterDetails}
+            options={{ title: 'Информация о персонаже' }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </ApolloProvider>
   );
 };
 

@@ -1,28 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
-import { getCharacters } from '../api/rickAndMortyApi';
 import CharacterCard from '../components/CharacterCard';
-import { Character } from '../types/Character';
+import { useCharactersQuery } from '../hooks/useCharactersQuery';
 
 const CharactersScreen = ({ navigation }: any) => {
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getCharacters();
-      setCharacters(data);
-    } catch (error) {
-      console.error('Ошибка загрузки персонажей', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const { characters, loading, refetch } = useCharactersQuery();
 
   return (
     <View style={styles.container}>
@@ -36,7 +18,7 @@ const CharactersScreen = ({ navigation }: any) => {
           />
         )}
         refreshing={loading}
-        onRefresh={load}
+        onRefresh={refetch}
       />
     </View>
   );
