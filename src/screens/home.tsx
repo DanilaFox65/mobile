@@ -28,7 +28,7 @@ const CharactersScreen = ({ navigation }: any) => {
     <View style={styles.container}>
       <FlatList
         data={characters}
-        keyExtractor={item => item.id!.toString()}
+        keyExtractor={item => item.id.toString()}
         renderItem={({ item }) => (
           <CharacterCard
             character={item}
