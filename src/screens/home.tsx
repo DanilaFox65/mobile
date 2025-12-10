@@ -42,7 +42,7 @@ const CharactersScreen = ({ navigation }: any) => {
         refreshing={isRefreshing}
         onRefresh={handleRefresh}
         onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
+        onEndReachedThreshold={1}
         ListFooterComponent={
           isFetchingMore ? <ActivityIndicator size="large" /> : null
         }
