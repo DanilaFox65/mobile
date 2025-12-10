@@ -10,35 +10,42 @@ import CharacterCard from '../components/CharacterCard';
 import { useCharactersQuery } from '../hooks/useCharactersQuery';
 
 const CharactersScreen = ({ navigation }: any) => {
-  const { characters, loading, refetch, error } = useCharactersQuery();
+  const {
+    characters,
+    loading,
+    error,
+    isRefreshing,
+    isFetchingMore,
+    handleRefresh,
+    handleLoadMore,
+  } = useCharactersQuery();
 
-  if (loading) {
+  if (loading && characters.length === 0) {
     return <ActivityIndicator style={{ flex: 1 }} size="large" />;
   }
 
   if (error) {
-    return <Text style={styles.errorText}>Ошибка загрузки персонажей</Text>;
-  }
-
-  if (!characters.length) {
-    return <Text style={styles.errorText}>Персонажи не найдены</Text>;
+    return <Text style={styles.errorText}>Ошибка загрузки</Text>;
   }
 
   return (
     <View style={styles.container}>
       <FlatList
         data={characters}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={(item, index) => `${item.id}_${index}`}
         renderItem={({ item }) => (
           <CharacterCard
             character={item}
-            onPress={id =>
-              navigation.navigate('Character', { id: id.toString() })
-            }
+            onPress={id => navigation.navigate('Character', { id })}
           />
         )}
-        refreshing={loading}
-        onRefresh={refetch}
+        refreshing={isRefreshing}
+        onRefresh={handleRefresh}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          isFetchingMore ? <ActivityIndicator size="large" /> : null
+        }
       />
     </View>
   );
@@ -51,11 +58,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#0000CD',
   },
   errorText: {
-    flex: 1,
     textAlign: 'center',
-    marginTop: 20,
     color: 'white',
-    fontSize: 18,
+    marginTop: 20,
+    fontSize: 20,
   },
 });
 

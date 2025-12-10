@@ -1,13 +1,93 @@
 import { useQuery } from '@apollo/client';
+import { useState, useEffect } from 'react';
 import { GET_CHARACTERS } from '../queries';
+import { Character } from '../types/Character';
 
 export const useCharactersQuery = () => {
-  const { data, loading, error, refetch } = useQuery(GET_CHARACTERS);
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [page, setPage] = useState(1);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const [hasMore, setHasMore] = useState(true);
+
+  const { data, loading, error, fetchMore, refetch } = useQuery(
+    GET_CHARACTERS,
+    {
+      variables: { page: 1 },
+      notifyOnNetworkStatusChange: true,
+    },
+  );
+
+  // Начальная загрузка
+  useEffect(() => {
+    if (data?.characters) {
+      setCharacters(data.characters.results);
+      setHasMore(!!data.characters.info.next);
+      setIsLoading(false);
+    }
+  }, [data]);
+
+  // ------- fetchData(page, isRefreshing) -------
+  const fetchData = async (pageNumber: number, isRefresh = false) => {
+    try {
+      if (isRefresh) {
+        setIsRefreshing(true);
+      } else if (pageNumber === 1) {
+        setIsLoading(true);
+      } else {
+        setIsFetchingMore(true);
+      }
+
+      const result = await fetchMore({
+        variables: { page: pageNumber },
+      });
+
+      const newData = result.data.characters;
+
+      if (isRefresh || pageNumber === 1) {
+        setCharacters(newData.results);
+      } else {
+        setCharacters(prev => [...prev, ...newData.results]);
+      }
+
+      setHasMore(!!newData.info.next);
+    } catch (e) {
+      console.log('Ошибка загрузки:', e);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+      setIsFetchingMore(false);
+    }
+  };
+
+  // ------- handleRefresh -------
+  const handleRefresh = () => {
+    setPage(1);
+    fetchData(1, true);
+  };
+
+  // ------- handleLoadMore -------
+  const handleLoadMore = () => {
+    if (isFetchingMore || isLoading || !hasMore) return;
+
+    const nextPage = page + 1;
+    setPage(nextPage);
+
+    fetchData(nextPage);
+  };
 
   return {
-    characters: data?.characters?.results || [],
-    loading,
+    characters,
+    loading: isLoading,
     error,
-    refetch,
+
+    handleRefresh,
+    isRefreshing,
+
+    handleLoadMore,
+    isFetchingMore,
   };
 };
