@@ -21,7 +21,6 @@ export const useCharactersQuery = () => {
     },
   );
 
-  // Начальная загрузка
   useEffect(() => {
     if (data?.characters) {
       setCharacters(data.characters.results);
@@ -30,7 +29,6 @@ export const useCharactersQuery = () => {
     }
   }, [data]);
 
-  // ------- fetchData(page, isRefreshing) -------
   const fetchData = async (pageNumber: number, isRefresh = false) => {
     try {
       if (isRefresh) {
@@ -63,13 +61,11 @@ export const useCharactersQuery = () => {
     }
   };
 
-  // ------- handleRefresh -------
   const handleRefresh = () => {
     setPage(1);
     fetchData(1, true);
   };
 
-  // ------- handleLoadMore -------
   const handleLoadMore = () => {
     if (isFetchingMore || isLoading || !hasMore) return;
 
