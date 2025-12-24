@@ -9,10 +9,20 @@ import { client } from './src/apollo/client';
 
 const Stack = createNativeStackNavigator();
 
+const linking = {
+  prefixes: ['VoronchukDaniil://'],
+  config: {
+    screens: {
+      Home: 'characters',
+      Character: 'character/:id',
+    },
+  },
+};
+
 const App = () => {
   return (
     <ApolloProvider client={client}>
-      <NavigationContainer>
+      <NavigationContainer linking={linking}>
         <Stack.Navigator>
           <Stack.Screen
             name="Home"
