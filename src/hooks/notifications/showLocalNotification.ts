@@ -1,18 +1,13 @@
-// hooks/notifications/showLocalNotification.ts
 import notifee from '@notifee/react-native';
 
-/**
-
- * @param id - id персонажа
- */
 export const showLocalNotification = async (id: string) => {
   const channelId = await notifee.createChannel({
     id: 'default',
-    name: 'Default Channel',
+    name: 'Default',
   });
 
   await notifee.displayNotification({
-    title: 'Персонаж',
+    title: `Персонаж #${id}`,
     body: 'Открыть страницу персонажа',
     android: {
       channelId,
@@ -21,7 +16,7 @@ export const showLocalNotification = async (id: string) => {
       },
     },
     data: {
-      deepLink: `VoronchukDaniil://character/${id}`,
+      deepLink: `voronchukDaniil://character/${id}`,
     },
   });
 };

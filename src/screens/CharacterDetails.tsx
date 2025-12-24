@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Alert,
   TouchableOpacity,
+  Platform,
+  Linking,
 } from 'react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { useCharacterQuery } from '../hooks/useCharacterQuery';
@@ -28,7 +30,7 @@ const CharacterDetails: React.FC = () => {
   if (!character) return <Text>Персонаж не найден</Text>;
 
   const onRemindPress = async () => {
-    const status = await getNotificationPermission();
+    let status = await getNotificationPermission();
 
     if (status === AuthorizationStatus.NOT_DETERMINED) {
       const granted = await requestNotificationsPermission();
@@ -39,6 +41,7 @@ const CharacterDetails: React.FC = () => {
         );
         return;
       }
+      status = await getNotificationPermission();
     }
 
     if (status === AuthorizationStatus.DENIED) {
@@ -49,7 +52,13 @@ const CharacterDetails: React.FC = () => {
           { text: 'Отмена', style: 'cancel' },
           {
             text: 'Открыть настройки',
-            onPress: () => {},
+            onPress: () => {
+              if (Platform.OS === 'ios') {
+                Linking.openURL('app-settings:');
+              } else {
+                Linking.openSettings();
+              }
+            },
           },
         ],
       );
@@ -61,7 +70,6 @@ const CharacterDetails: React.FC = () => {
       status === AuthorizationStatus.PROVISIONAL
     ) {
       await showLocalNotification(id);
-      Alert.alert('Напоминание создано', 'Вы получите уведомление о персонаже');
     }
   };
 

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Linking, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ApolloProvider } from '@apollo/client/react';
@@ -6,11 +7,12 @@ import { ApolloProvider } from '@apollo/client/react';
 import CharactersScreen from './src/screens/home';
 import CharacterDetails from './src/screens/CharacterDetails';
 import { client } from './src/apollo/client';
+import notifee, { EventType } from '@notifee/react-native';
 
 const Stack = createNativeStackNavigator();
 
 const linking = {
-  prefixes: ['VoronchukDaniil://'],
+  prefixes: ['voronchukdaniil://'],
   config: {
     screens: {
       Home: 'characters',
@@ -20,6 +22,35 @@ const linking = {
 };
 
 const App = () => {
+  React.useEffect(() => {
+    // Обработка кликов на уведомления в foreground
+    const unsubscribeForeground = notifee.onForegroundEvent(
+      ({ type, detail }) => {
+        const deepLink = detail.notification?.data?.deepLink;
+        if (type === EventType.PRESS && deepLink) {
+          Linking.openURL(String(deepLink)).catch(() =>
+            Alert.alert('Ошибка', 'Не удалось открыть экран персонажа'),
+          );
+        }
+      },
+    );
+
+    // Обработка кликов на уведомления в background
+    notifee.onBackgroundEvent(async ({ type, detail }) => {
+      const deepLink = detail.notification?.data?.deepLink;
+      if (type === EventType.PRESS && deepLink) {
+        Linking.openURL(String(deepLink)).catch(() =>
+          console.warn('Не удалось открыть deep link из фонового уведомления'),
+        );
+      }
+    });
+
+    // Отписка только от foreground
+    return () => {
+      unsubscribeForeground();
+    };
+  }, []);
+
   return (
     <ApolloProvider client={client}>
       <NavigationContainer linking={linking}>
